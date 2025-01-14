@@ -51,6 +51,8 @@ do
     Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + $"Begin round!");
     bool endRund = false;
     int activePlayerIndex = 0;
+    int discardTotal = 0;
+
     // round loop
     do
     {
@@ -58,6 +60,8 @@ do
         {
             continue;
         }
+
+        Console.WriteLine(Environment.NewLine + $"Current discard total is {discardTotal}");
 
         if (activePlayerIndex == 0)
         {
@@ -70,6 +74,8 @@ do
             {
                 Console.Write($"Which card would you like to play, {playerName}? ");
             } while (!int.TryParse(Console.ReadLine(), out selectedMenuCard) || selectedMenuCard < 1 || selectedMenuCard > 3);
+            // TODO: process game specific card values
+            discardTotal += (int)playerHands[activePlayerIndex][selectedMenuCard - 1].Rank;
         }
         else
         {
