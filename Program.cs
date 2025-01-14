@@ -130,6 +130,8 @@ do
             }
         }
 
+        Thread.Sleep(3000);
+
         // TODO: proper endRound due to no valid cards to play
         endRund = discardTotal >= 99;
     } while (!endRund);
