@@ -59,18 +59,44 @@ do
             continue;
         }
 
+        if (activePlayerIndex == 0)
+        {
+            Console.WriteLine($"{playerName}'s turn.");
+        }
+        else
+        {
+            Console.WriteLine($"{players[activePlayerIndex]}'s turn.");
+        }
+
         activePlayerIndex++;
+        /*********************************
+        **                              **
+        **  HANDLE UNSTABLE CODE STATE  **
+        **                              **
+        *********************************/
+        endRund = activePlayerIndex == 3;
+        /*********************************
+        **                              **
+        **  HANDLE UNSTABLE CODE STATE  **
+        **                              **
+        *********************************/
         if (activePlayerIndex == players.Count)
         {
             activePlayerIndex = 0;
         }
-        
-        // HANDLE UNSTABLE CODE STATE
-        endRund = true;
     } while (!endRund);
 
-    // HANDLE UNSTABLE CODE STATE
+    /*********************************
+    **                              **
+    **  HANDLE UNSTABLE CODE STATE  **
+    **                              **
+    *********************************/
     break;
+    /*********************************
+    **                              **
+    **  HANDLE UNSTABLE CODE STATE  **
+    **                              **
+    *********************************/
 } while (playerTokens.Count(t => t > 0) > 1);
 
 Console.WriteLine($"Press any key to exit, {playerName}.");
