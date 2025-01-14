@@ -1,4 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using AwFuL.PlayingCard;
+
 Console.WriteLine("Ninety Nine - A Card Game");
 
 string playerName;
@@ -28,6 +30,24 @@ Array.Fill(playerTokens, 3);
 // game loop
 do
 {
+    CardDeck drawPile = CardDeck.CreateStandard52CardDeck();
+    drawPile.Shuffle();
+    Dictionary<int, List<StandardCard>> playerHands = [];
+    foreach (KeyValuePair<int, string> p in players)
+    {
+        if (playerTokens[p.Key] == 0)
+        {
+            continue;
+        }
+
+        List<StandardCard> hand = [];
+        for (int lc = 0; lc < players.Count; lc++)
+        {
+            hand.Add(drawPile.DrawCard());
+        }
+        playerHands.Add(p.Key, hand);
+    }
+
     // HANDLE UNSTABLE CODE STATE
     break;
 } while (playerTokens.Count(t => t > 0) > 1);
