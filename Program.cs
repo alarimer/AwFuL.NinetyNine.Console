@@ -32,7 +32,7 @@ int[] playerTokens = new int[players.Count];
 Array.Fill(playerTokens, 3);
 
 // game loop
-do
+while (playerTokens.Count(t => t > 0) > 1)
 {
     CardDeck drawPile = CardDeck.CreateStandard52CardDeck();
     drawPile.Shuffle();
@@ -54,14 +54,13 @@ do
 
     Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + $"Begin round!");
     Thread.Sleep(2000);
-    bool endRound = false;
     var activePlayerIndexes = playerTokens.Select((value, index) => new {value, index}).Where(t => t.value > 0).Select(p => p.index).ToArray();
     int activePlayerIndex = activePlayerIndexes[0];
     int discardTotal = 0;
     bool isForwardPlay = true;
 
     // round loop
-    do
+    while (true)
     {
         string currentPlayerName = players[activePlayerIndex];
 
@@ -95,7 +94,7 @@ do
                 Console.WriteLine($"{players[pc],-10}: " + (playerTokens[pc] > 0 ? $"{playerTokens[pc]} tokens" : "out"));
             }
             Thread.Sleep(3000);
-            endRound = true;
+
             break;
         }
 
@@ -167,8 +166,8 @@ do
         Thread.Sleep(1500);
 
         activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
-    } while (!endRound);
-} while (playerTokens.Count(t => t > 0) > 1);
+    }
+}
 
 Console.WriteLine(Environment.NewLine + $"{players[playerTokens.ToList().FindIndex(t => t > 0)]} is the winner!");
 Thread.Sleep(1500);
@@ -199,6 +198,7 @@ static int SelectCardValue(int[] options)
 
 static int AdvancePlay(int[] activePlayerIndexes, int activePlayerIndex, bool isForwardPlay)
 {
+    // https://codereview.stackexchange.com/a/126223/150099
 	int selectionIndex = Array.IndexOf(activePlayerIndexes, activePlayerIndex);
 	
     if (isForwardPlay)
