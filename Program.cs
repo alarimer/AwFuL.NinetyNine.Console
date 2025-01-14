@@ -1,7 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using AwFuL.PlayingCard;
 
-Console.WriteLine("Ninety Nine - A Card Game");
+Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + "Ninety Nine - A Card Game" + Environment.NewLine);
 
 string playerName;
 Dictionary<int, string> players = [];
@@ -113,5 +113,5 @@ do
     *********************************/
 } while (playerTokens.Count(t => t > 0) > 1);
 
-Console.WriteLine($"Press any key to exit, {playerName}.");
+Console.WriteLine(Environment.NewLine + $"Press any key to exit, {playerName}.");
 Console.ReadKey();
