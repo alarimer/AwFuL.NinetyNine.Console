@@ -74,14 +74,25 @@ do
             {
                 Console.Write($"Which card would you like to play, {playerName}? ");
             } while (!int.TryParse(Console.ReadLine(), out selectedMenuCard) || selectedMenuCard < 1 || selectedMenuCard > 3);
-            // TODO: process game specific card values
-            discardTotal += (int)playerHands[activePlayerIndex][selectedMenuCard - 1].Rank;
+            // TODO: handle cards with multiple values
+            StandardRank selectedCardRank = playerHands[activePlayerIndex][selectedMenuCard - 1].Rank;
+            int cardValue = selectedCardRank switch
+            {
+                StandardRank.Ace => 11,
+                StandardRank.Ten => -10,
+                StandardRank.Jack or StandardRank.Queen => 10,
+                StandardRank.Four or StandardRank.King => 0,
+                StandardRank.Nine => 99,
+                _ => (int)selectedCardRank,
+            };
+            discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
         }
         else
         {
             Console.WriteLine($"{players[activePlayerIndex]}'s turn.");
         }
 
+        // TODO: handle reverse (4) and skip (3)
         activePlayerIndex++;
         /*********************************
         **                              **
