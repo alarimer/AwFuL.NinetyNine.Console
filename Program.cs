@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Security.AccessControl;
-using AwFuL.PlayingCard;
+﻿using AwFuL.PlayingCard;
 
 Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + "Ninety Nine - A Card Game" + Environment.NewLine);
 
@@ -89,13 +87,19 @@ do
 
             playerHands[activePlayerIndex].RemoveAt(selectedMenuCard - 1);
             playerHands[activePlayerIndex].Add(drawPile.DrawCard());
+
+            if (selectedCardRank == StandardRank.Three)
+            {
+                Console.WriteLine($"{playerName} skipped {players[activePlayerIndex + 1]}!");
+                activePlayerIndex++;
+            }
         }
         else
         {
             Console.WriteLine($"{players[activePlayerIndex]}'s turn.");
         }
 
-        // TODO: handle reverse (4) and skip (3)
+        // TODO: handle reverse (4)
         activePlayerIndex++;
         if (activePlayerIndex == players.Count)
         {
