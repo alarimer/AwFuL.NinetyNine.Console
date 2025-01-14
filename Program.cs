@@ -50,10 +50,21 @@ do
 
     Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + $"Begin round!");
     bool endRund = false;
+    int activePlayerIndex = 0;
     // round loop
     do
     {
+        if (playerTokens[activePlayerIndex] == 0)
+        {
+            continue;
+        }
 
+        activePlayerIndex++;
+        if (activePlayerIndex == players.Count)
+        {
+            activePlayerIndex = 0;
+        }
+        
         // HANDLE UNSTABLE CODE STATE
         endRund = true;
     } while (!endRund);
