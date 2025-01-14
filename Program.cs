@@ -1,4 +1,6 @@
-﻿using AwFuL.PlayingCard;
+﻿using System.Linq.Expressions;
+using System.Runtime.InteropServices;
+using AwFuL.PlayingCard;
 
 Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + "Ninety Nine - A Card Game" + Environment.NewLine);
 
@@ -22,6 +24,7 @@ for (int coc = 1; coc <= computerOpponentCount; coc++)
     players.Add(coc, $"computer{coc}");
 }
 Console.WriteLine($"Okay, {playerName}, {computerOpponentCount} computer opponents. Good luck!");
+Thread.Sleep(2000);
 
 int[] playerTokens = new int[players.Count];
 Array.Fill(playerTokens, 3);
@@ -40,7 +43,7 @@ do
         }
 
         List<StandardCard> hand = [];
-        for (int lc = 0; lc < players.Count; lc++)
+        for (int lc = 3; lc > 0; lc--)
         {
             hand.Add(drawPile.DrawCard());
         }
@@ -48,7 +51,8 @@ do
     }
 
     Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + $"Begin round!");
-    bool endRund = false;
+    Thread.Sleep(2000);
+    bool endRound = false;
     int activePlayerIndex = 0;
     int discardTotal = 0;
     bool isForwardPlay = true;
@@ -58,10 +62,53 @@ do
     {
         if (playerTokens[activePlayerIndex] == 0)
         {
+            activePlayerIndex = AdvancePlay(players.Count, activePlayerIndex, isForwardPlay);
             continue;
         }
 
         Console.WriteLine(Environment.NewLine + $"Current discard total is {discardTotal}");
+
+        bool hasValidPlay = false;
+        foreach (StandardCard card in playerHands[activePlayerIndex])
+        {
+            hasValidPlay = card.Rank switch
+            {
+                StandardRank.Four or StandardRank.King or StandardRank.Nine or StandardRank.Ten => true,
+                StandardRank.Ace => discardTotal + 1 < 100,
+                StandardRank.Jack or StandardRank.Queen => discardTotal + 10 < 100,
+                _ => discardTotal + (int)card.Rank < 100,
+            };
+
+            if (hasValidPlay)
+            {
+                break;
+            }
+        }
+/*******************************************************
+****                                                ****
+****    HACK: INCOMPLETE IMPLEMENTATION INSURANCE   ****
+****                                                ****
+*******************************************************/
+if (discardTotal > 88 && activePlayerIndex != 0) hasValidPlay = false;
+/*******************************************************
+****                                                ****
+****    HACK: INCOMPLETE IMPLEMENTATION INSURANCE   ****
+****                                                ****
+*******************************************************/
+        if (!hasValidPlay)
+        {
+            Console.WriteLine($"{players[activePlayerIndex]} cannot play a card and loses a token.");
+            Console.WriteLine($"\t{playerHands[activePlayerIndex][0]} - {playerHands[activePlayerIndex][1]} - {playerHands[activePlayerIndex][2]}" + Environment.NewLine);
+            playerTokens[activePlayerIndex]--;
+            Thread.Sleep(3000);
+            for (int pc = 0; pc < players.Count; pc++)
+            {
+                Console.WriteLine($"{players[pc],-10}: " + (playerTokens[pc] > 0 ? $"{playerTokens[pc]} tokens" : "out"));
+            }
+            Thread.Sleep(3000);
+            endRound = true;
+            break;
+        }
 
         if (activePlayerIndex == 0)
         {
@@ -69,24 +116,38 @@ do
             {
                 Console.WriteLine($"\t {cc + 1} {playerHands[0][cc]}");
             }
-            int selectedMenuCard = 0;
+            bool isValidCard = false;
+            StandardCard selectedCard;
+            StandardRank selectedCardRank;
+            int cardValue;
             do
             {
-                Console.Write($"Which card would you like to play, {playerName}? ");
-            } while (!int.TryParse(Console.ReadLine(), out selectedMenuCard) || selectedMenuCard < 1 || selectedMenuCard > 3);
-            StandardRank selectedCardRank = playerHands[activePlayerIndex][selectedMenuCard - 1].Rank;
-            int cardValue = selectedCardRank switch
-            {
-                StandardRank.Ace => SelectCardValue([11, 1]),
-                StandardRank.Ten => SelectCardValue([-10, 10]),
-                StandardRank.Jack or StandardRank.Queen => 10,
-                StandardRank.Four or StandardRank.King => 0,
-                StandardRank.Nine => 99,
-                _ => (int)selectedCardRank,
-            };
+                int selectedMenuCard = 0;
+                do
+                {
+                    Console.Write($"Which card would you like to play, {playerName}? ");
+                } while (!int.TryParse(Console.ReadLine(), out selectedMenuCard) || selectedMenuCard < 1 || selectedMenuCard > 3);
+                selectedCard = playerHands[activePlayerIndex][selectedMenuCard - 1];
+                selectedCardRank = selectedCard.Rank;
+                cardValue = selectedCardRank switch
+                {
+                    StandardRank.Ace => SelectCardValue([11, 1]),
+                    StandardRank.Ten => SelectCardValue([-10, 10]),
+                    StandardRank.Jack or StandardRank.Queen => 10,
+                    StandardRank.Four or StandardRank.King => 0,
+                    StandardRank.Nine => 99,
+                    _ => (int)selectedCardRank,
+                };
+                isValidCard = cardValue == 99 || discardTotal + cardValue < 100;
+                if (!isValidCard)
+                {
+                    Console.WriteLine($"Cannot play the {selectedCard} because the discard total would be {discardTotal + cardValue} which exceeds 99.");
+                }
+            } while (!isValidCard);
+            Console.WriteLine(Environment.NewLine + $"{playerName} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
             discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
 
-            playerHands[activePlayerIndex].RemoveAt(selectedMenuCard - 1);
+            playerHands[activePlayerIndex].Remove(selectedCard);
             playerHands[activePlayerIndex].Add(drawPile.DrawCard());
 
             if (selectedCardRank == StandardRank.Three)
@@ -111,45 +172,14 @@ do
         else
         {
             Console.WriteLine($"{players[activePlayerIndex]}'s turn.");
+            Thread.Sleep(3000);
         }
 
-        if (isForwardPlay)
-        {
-            activePlayerIndex++;
-            if (activePlayerIndex == players.Count)
-            {
-                activePlayerIndex = 0;
-            }
-        }
-        else
-        {
-            activePlayerIndex--;
-            if (activePlayerIndex == -1)
-            {
-                activePlayerIndex = players.Count - 1;
-            }
-        }
-
-        Thread.Sleep(3000);
-
-        // TODO: proper endRound due to no valid cards to play
-        endRund = discardTotal >= 99;
-    } while (!endRund);
-    Console.WriteLine(Environment.NewLine + $"Current discard total is {discardTotal}");
-
-    /****************************************
-    **                                     **
-    **  HANDLE NOT IMPLEMENTED CODE STATE  **
-    **                                     **
-    ****************************************/
-    break;
-    /****************************************
-    **                                     **
-    **  HANDLE NOT IMPLEMENTED CODE STATE  **
-    **                                     **
-    ****************************************/
+        activePlayerIndex = AdvancePlay(players.Count, activePlayerIndex, isForwardPlay);
+    } while (!endRound);
 } while (playerTokens.Count(t => t > 0) > 1);
 
+Console.WriteLine(Environment.NewLine + $"{players[playerTokens.ToList().FindIndex(t => t > 0)]} is the winner!");
 Console.WriteLine(Environment.NewLine + $"Press any key to exit, {playerName}.");
 Console.ReadKey();
 
@@ -161,4 +191,26 @@ static int SelectCardValue(int[] options)
         Console.Write($"{options[0]} or {options[1]}? ");
     } while (!int.TryParse(Console.ReadLine(), out selectedValue) || !options.Contains(selectedValue));
     return selectedValue;
+}
+
+static int AdvancePlay(int playerCount, int activePlayerIndex, bool isForwardPlay)
+{
+    if (isForwardPlay)
+    {
+        activePlayerIndex++;
+        if (activePlayerIndex == playerCount)
+        {
+            activePlayerIndex = 0;
+        }
+    }
+    else
+    {
+        activePlayerIndex--;
+        if (activePlayerIndex == -1)
+        {
+            activePlayerIndex = playerCount - 1;
+        }
+    }
+
+    return activePlayerIndex;
 }
