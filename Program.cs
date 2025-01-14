@@ -61,7 +61,15 @@ do
 
         if (activePlayerIndex == 0)
         {
-            Console.WriteLine($"{playerName}'s turn.");
+            for (int cc = 0; cc < 3; cc++)
+            {
+                Console.WriteLine($"\t {cc + 1} {playerHands[0][cc]}");
+            }
+            int selectedMenuCard = 0;
+            do
+            {
+                Console.Write($"Which card would you like to play, {playerName}? ");
+            } while (!int.TryParse(Console.ReadLine(), out selectedMenuCard) || selectedMenuCard < 1 || selectedMenuCard > 3);
         }
         else
         {
