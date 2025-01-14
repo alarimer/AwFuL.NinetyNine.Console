@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using System.Security.AccessControl;
 using AwFuL.PlayingCard;
 
 Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + "Ninety Nine - A Card Game" + Environment.NewLine);
@@ -104,18 +105,19 @@ do
         // TODO: proper endRound due to no valid cards to play
         endRund = discardTotal >= 99;
     } while (!endRund);
+    Console.WriteLine(Environment.NewLine + $"Current discard total is {discardTotal}");
 
-    /*********************************
-    **                              **
-    **  HANDLE UNSTABLE CODE STATE  **
-    **                              **
-    *********************************/
+    /****************************************
+    **                                     **
+    **  HANDLE NOT IMPLEMENTED CODE STATE  **
+    **                                     **
+    ****************************************/
     break;
-    /*********************************
-    **                              **
-    **  HANDLE UNSTABLE CODE STATE  **
-    **                              **
-    *********************************/
+    /****************************************
+    **                                     **
+    **  HANDLE NOT IMPLEMENTED CODE STATE  **
+    **                                     **
+    ****************************************/
 } while (playerTokens.Count(t => t > 0) > 1);
 
 Console.WriteLine(Environment.NewLine + $"Press any key to exit, {playerName}.");
