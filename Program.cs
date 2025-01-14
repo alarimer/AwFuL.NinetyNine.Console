@@ -48,6 +48,16 @@ do
         playerHands.Add(p.Key, hand);
     }
 
+    Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + $"Begin round!");
+    bool endRund = false;
+    // round loop
+    do
+    {
+
+        // HANDLE UNSTABLE CODE STATE
+        endRund = true;
+    } while (!endRund);
+
     // HANDLE UNSTABLE CODE STATE
     break;
 } while (playerTokens.Count(t => t > 0) > 1);
