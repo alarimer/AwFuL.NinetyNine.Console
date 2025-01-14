@@ -22,5 +22,8 @@ for (int coc = 1; coc <= computerOpponentCount; coc++)
 }
 Console.WriteLine($"Okay, {playerName}, {computerOpponentCount} computer opponents. Good luck!");
 
+int[] playerTokens = new int[players.Count];
+Array.Fill(playerTokens, 3);
+
 Console.WriteLine($"Press any key to exit, {playerName}.");
 Console.ReadKey();
