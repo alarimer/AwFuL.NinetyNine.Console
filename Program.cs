@@ -86,6 +86,9 @@ do
                 _ => (int)selectedCardRank,
             };
             discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
+
+            playerHands[activePlayerIndex].RemoveAt(selectedMenuCard - 1);
+            playerHands[activePlayerIndex].Add(drawPile.DrawCard());
         }
         else
         {
@@ -94,21 +97,22 @@ do
 
         // TODO: handle reverse (4) and skip (3)
         activePlayerIndex++;
-        /*********************************
-        **                              **
-        **  HANDLE UNSTABLE CODE STATE  **
-        **                              **
-        *********************************/
-        endRund = activePlayerIndex == 3;
-        /*********************************
-        **                              **
-        **  HANDLE UNSTABLE CODE STATE  **
-        **                              **
-        *********************************/
         if (activePlayerIndex == players.Count)
         {
             activePlayerIndex = 0;
         }
+
+        /*********************************
+        **                              **
+        **  HANDLE UNSTABLE CODE STATE  **
+        **                              **
+        *********************************/
+        endRund = discardTotal >= 99;
+        /*********************************
+        **                              **
+        **  HANDLE UNSTABLE CODE STATE  **
+        **                              **
+        *********************************/
     } while (!endRund);
 
     /*********************************
