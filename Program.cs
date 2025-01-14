@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using AwFuL.PlayingCard;
 
 Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + "Ninety Nine - A Card Game" + Environment.NewLine);
+Thread.Sleep(3000);
 
 string playerName;
 Dictionary<int, string> players = [];
@@ -12,7 +13,8 @@ do
     playerName = Console.ReadLine()?.Trim() ?? String.Empty;
 } while (String.IsNullOrEmpty(playerName));
 players.Add(0, playerName);
-Console.WriteLine(Environment.NewLine + $"Hello, {playerName}.");
+Console.WriteLine($"Hello, {playerName}.");
+Thread.Sleep(2000);
 
 int computerOpponentCount;
 do
@@ -53,18 +55,15 @@ do
     Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + $"Begin round!");
     Thread.Sleep(2000);
     bool endRound = false;
-    int activePlayerIndex = 0;
+    var activePlayerIndexes = playerTokens.Select((value, index) => new {value, index}).Where(t => t.value > 0).Select(p => p.index).ToArray();
+    int activePlayerIndex = activePlayerIndexes[0];
     int discardTotal = 0;
     bool isForwardPlay = true;
 
     // round loop
     do
     {
-        if (playerTokens[activePlayerIndex] == 0)
-        {
-            activePlayerIndex = AdvancePlay(players.Count, activePlayerIndex, isForwardPlay);
-            continue;
-        }
+        string currentPlayerName = players[activePlayerIndex];
 
         Console.WriteLine(Environment.NewLine + $"Current discard total is {discardTotal}");
 
@@ -84,17 +83,7 @@ do
                 break;
             }
         }
-/*******************************************************
-****                                                ****
-****    HACK: INCOMPLETE IMPLEMENTATION INSURANCE   ****
-****                                                ****
-*******************************************************/
-if (discardTotal > 88 && activePlayerIndex != 0) hasValidPlay = false;
-/*******************************************************
-****                                                ****
-****    HACK: INCOMPLETE IMPLEMENTATION INSURANCE   ****
-****                                                ****
-*******************************************************/
+
         if (!hasValidPlay)
         {
             Console.WriteLine($"{players[activePlayerIndex]} cannot play a card and loses a token.");
@@ -125,7 +114,7 @@ if (discardTotal > 88 && activePlayerIndex != 0) hasValidPlay = false;
                 int selectedMenuCard = 0;
                 do
                 {
-                    Console.Write($"Which card would you like to play, {playerName}? ");
+                    Console.Write($"Which card would you like to play, {currentPlayerName}? ");
                 } while (!int.TryParse(Console.ReadLine(), out selectedMenuCard) || selectedMenuCard < 1 || selectedMenuCard > 3);
                 selectedCard = playerHands[activePlayerIndex][selectedMenuCard - 1];
                 selectedCardRank = selectedCard.Rank;
@@ -144,7 +133,7 @@ if (discardTotal > 88 && activePlayerIndex != 0) hasValidPlay = false;
                     Console.WriteLine($"Cannot play the {selectedCard} because the discard total would be {discardTotal + cardValue} which exceeds 99.");
                 }
             } while (!isValidCard);
-            Console.WriteLine(Environment.NewLine + $"{playerName} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
+            Console.WriteLine($"{playerName} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
             discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
 
             playerHands[activePlayerIndex].Remove(selectedCard);
@@ -152,36 +141,67 @@ if (discardTotal > 88 && activePlayerIndex != 0) hasValidPlay = false;
 
             if (selectedCardRank == StandardRank.Three)
             {
-                Console.WriteLine($"{playerName} skipped {(isForwardPlay ? players[activePlayerIndex + 1] : players[players.Count - 1])}!");
-                if (isForwardPlay)
-                {
-                    activePlayerIndex++;
-                }
-                else
-                {
-                    activePlayerIndex = players.Count - 1;
-                }
+                activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
+                Console.WriteLine($"{currentPlayerName} skipped {players[activePlayerIndex]}!");
             }
 
             if (selectedCardRank == StandardRank.Four)
             {
-                Console.WriteLine($"{playerName} reversed play!");
+                Console.WriteLine($"{currentPlayerName} reversed play!");
                 isForwardPlay = !isForwardPlay;
             }
         }
-        else
+        else    // computer turn
         {
-            Console.WriteLine($"{players[activePlayerIndex]}'s turn.");
-            Thread.Sleep(3000);
+            Console.WriteLine($"{currentPlayerName}'s turn.");
+            Thread.Sleep(1500);
+
+            var playMe = playerHands[activePlayerIndex].Select(ph => new { card = ph, value = ComputerPlayValue(ph.Rank) }).OrderByDescending(v => v.value).First(v => discardTotal + v.value < 100);
+            StandardCard selectedCard = playMe.card;
+            StandardRank selectedCardRank = selectedCard.Rank;
+            int cardValue = playMe.card.Rank == StandardRank.Nine ? 99 : playMe.value;
+
+            Console.WriteLine($"{players[activePlayerIndex]} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
+            discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
+
+            playerHands[activePlayerIndex].Remove(selectedCard);
+            playerHands[activePlayerIndex].Add(drawPile.DrawCard());
+
+            if (selectedCardRank == StandardRank.Three)
+            {
+                activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
+                Console.WriteLine($"{currentPlayerName} skipped {players[activePlayerIndex]}!");
+            }
+
+            if (selectedCardRank == StandardRank.Four)
+            {
+                Console.WriteLine($"{currentPlayerName} reversed play!");
+                isForwardPlay = !isForwardPlay;
+            }
+
+            Thread.Sleep(1500);
         }
 
-        activePlayerIndex = AdvancePlay(players.Count, activePlayerIndex, isForwardPlay);
+        activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
     } while (!endRound);
 } while (playerTokens.Count(t => t > 0) > 1);
 
 Console.WriteLine(Environment.NewLine + $"{players[playerTokens.ToList().FindIndex(t => t > 0)]} is the winner!");
+Thread.Sleep(1500);
 Console.WriteLine(Environment.NewLine + $"Press any key to exit, {playerName}.");
 Console.ReadKey();
+
+static int ComputerPlayValue(StandardRank cardRank)
+{
+    return cardRank switch
+    {
+        StandardRank.Ace => 1,
+        StandardRank.Ten => -10,
+        StandardRank.Jack or StandardRank.Queen => 10,
+        StandardRank.Four or StandardRank.King or StandardRank.Nine => 0,
+        _ => (int)cardRank
+    };
+}
 
 static int SelectCardValue(int[] options)
 {
@@ -193,24 +213,21 @@ static int SelectCardValue(int[] options)
     return selectedValue;
 }
 
-static int AdvancePlay(int playerCount, int activePlayerIndex, bool isForwardPlay)
+static int AdvancePlay(int[] activePlayerIndexes, int activePlayerIndex, bool isForwardPlay)
 {
+	int selectionIndex = Array.IndexOf(activePlayerIndexes, activePlayerIndex);
+	
     if (isForwardPlay)
     {
-        activePlayerIndex++;
-        if (activePlayerIndex == playerCount)
-        {
-            activePlayerIndex = 0;
-        }
+		selectionIndex++;
     }
     else
     {
-        activePlayerIndex--;
-        if (activePlayerIndex == -1)
-        {
-            activePlayerIndex = playerCount - 1;
-        }
+		selectionIndex--;
     }
+	
+	selectionIndex += activePlayerIndexes.Length;
+	selectionIndex %= activePlayerIndexes.Length;
 
-    return activePlayerIndex;
+	return activePlayerIndexes[selectionIndex];
 }
