@@ -51,6 +51,7 @@ do
     bool endRund = false;
     int activePlayerIndex = 0;
     int discardTotal = 0;
+    bool isForwardPlay = true;
 
     // round loop
     do
@@ -90,8 +91,21 @@ do
 
             if (selectedCardRank == StandardRank.Three)
             {
-                Console.WriteLine($"{playerName} skipped {players[activePlayerIndex + 1]}!");
-                activePlayerIndex++;
+                Console.WriteLine($"{playerName} skipped {(isForwardPlay ? players[activePlayerIndex + 1] : players[players.Count - 1])}!");
+                if (isForwardPlay)
+                {
+                    activePlayerIndex++;
+                }
+                else
+                {
+                    activePlayerIndex = players.Count - 1;
+                }
+            }
+
+            if (selectedCardRank == StandardRank.Four)
+            {
+                Console.WriteLine($"{playerName} reversed play!");
+                isForwardPlay = !isForwardPlay;
             }
         }
         else
@@ -99,11 +113,21 @@ do
             Console.WriteLine($"{players[activePlayerIndex]}'s turn.");
         }
 
-        // TODO: handle reverse (4)
-        activePlayerIndex++;
-        if (activePlayerIndex == players.Count)
+        if (isForwardPlay)
         {
-            activePlayerIndex = 0;
+            activePlayerIndex++;
+            if (activePlayerIndex == players.Count)
+            {
+                activePlayerIndex = 0;
+            }
+        }
+        else
+        {
+            activePlayerIndex--;
+            if (activePlayerIndex == -1)
+            {
+                activePlayerIndex = players.Count - 1;
+            }
         }
 
         // TODO: proper endRound due to no valid cards to play
