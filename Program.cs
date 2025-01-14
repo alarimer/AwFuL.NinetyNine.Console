@@ -11,7 +11,7 @@ do
 {
     Console.Write("What is your name? ");
     playerName = Console.ReadLine()?.Trim() ?? String.Empty;
-} while (String.IsNullOrEmpty(playerName));
+} while (string.IsNullOrEmpty(playerName));
 players.Add(0, playerName);
 Console.WriteLine($"Hello, {playerName}.");
 Thread.Sleep(2000);
@@ -99,6 +99,10 @@ do
             break;
         }
 
+        StandardCard selectedCard;
+        StandardRank selectedCardRank;
+        int cardValue;
+
         if (activePlayerIndex == 0)
         {
             for (int cc = 0; cc < 3; cc++)
@@ -106,9 +110,6 @@ do
                 Console.WriteLine($"\t {cc + 1} {playerHands[0][cc]}");
             }
             bool isValidCard = false;
-            StandardCard selectedCard;
-            StandardRank selectedCardRank;
-            int cardValue;
             do
             {
                 int selectedMenuCard = 0;
@@ -133,23 +134,6 @@ do
                     Console.WriteLine($"Cannot play the {selectedCard} because the discard total would be {discardTotal + cardValue} which exceeds 99.");
                 }
             } while (!isValidCard);
-            Console.WriteLine($"{playerName} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
-            discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
-
-            playerHands[activePlayerIndex].Remove(selectedCard);
-            playerHands[activePlayerIndex].Add(drawPile.DrawCard());
-
-            if (selectedCardRank == StandardRank.Three)
-            {
-                activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
-                Console.WriteLine($"{currentPlayerName} skipped {players[activePlayerIndex]}!");
-            }
-
-            if (selectedCardRank == StandardRank.Four)
-            {
-                Console.WriteLine($"{currentPlayerName} reversed play!");
-                isForwardPlay = !isForwardPlay;
-            }
         }
         else    // computer turn
         {
@@ -157,30 +141,30 @@ do
             Thread.Sleep(1500);
 
             var playMe = playerHands[activePlayerIndex].Select(ph => new { card = ph, value = ComputerPlayValue(ph.Rank) }).OrderByDescending(v => v.value).First(v => discardTotal + v.value < 100);
-            StandardCard selectedCard = playMe.card;
-            StandardRank selectedCardRank = selectedCard.Rank;
-            int cardValue = playMe.card.Rank == StandardRank.Nine ? 99 : playMe.value;
-
-            Console.WriteLine($"{players[activePlayerIndex]} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
-            discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
-
-            playerHands[activePlayerIndex].Remove(selectedCard);
-            playerHands[activePlayerIndex].Add(drawPile.DrawCard());
-
-            if (selectedCardRank == StandardRank.Three)
-            {
-                activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
-                Console.WriteLine($"{currentPlayerName} skipped {players[activePlayerIndex]}!");
-            }
-
-            if (selectedCardRank == StandardRank.Four)
-            {
-                Console.WriteLine($"{currentPlayerName} reversed play!");
-                isForwardPlay = !isForwardPlay;
-            }
-
-            Thread.Sleep(1500);
+            selectedCard = playMe.card;
+            selectedCardRank = selectedCard.Rank;
+            cardValue = playMe.card.Rank == StandardRank.Nine ? 99 : playMe.value;
         }
+
+        Console.WriteLine($"{players[activePlayerIndex]} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
+        discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
+
+        playerHands[activePlayerIndex].Remove(selectedCard);
+        playerHands[activePlayerIndex].Add(drawPile.DrawCard());
+
+        if (selectedCardRank == StandardRank.Three)
+        {
+            activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
+            Console.WriteLine($"{currentPlayerName} skipped {players[activePlayerIndex]}!");
+        }
+
+        if (selectedCardRank == StandardRank.Four)
+        {
+            Console.WriteLine($"{currentPlayerName} reversed play!");
+            isForwardPlay = !isForwardPlay;
+        }
+
+        Thread.Sleep(1500);
 
         activePlayerIndex = AdvancePlay(activePlayerIndexes, activePlayerIndex, isForwardPlay);
     } while (!endRound);
