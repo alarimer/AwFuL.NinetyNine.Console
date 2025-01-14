@@ -25,5 +25,12 @@ Console.WriteLine($"Okay, {playerName}, {computerOpponentCount} computer opponen
 int[] playerTokens = new int[players.Count];
 Array.Fill(playerTokens, 3);
 
+// game loop
+do
+{
+    // HANDLE UNSTABLE CODE STATE
+    break;
+} while (playerTokens.Count(t => t > 0) > 1);
+
 Console.WriteLine($"Press any key to exit, {playerName}.");
 Console.ReadKey();
