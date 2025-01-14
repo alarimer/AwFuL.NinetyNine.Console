@@ -74,12 +74,11 @@ do
             {
                 Console.Write($"Which card would you like to play, {playerName}? ");
             } while (!int.TryParse(Console.ReadLine(), out selectedMenuCard) || selectedMenuCard < 1 || selectedMenuCard > 3);
-            // TODO: handle cards with multiple values
             StandardRank selectedCardRank = playerHands[activePlayerIndex][selectedMenuCard - 1].Rank;
             int cardValue = selectedCardRank switch
             {
-                StandardRank.Ace => 11,
-                StandardRank.Ten => -10,
+                StandardRank.Ace => SelectCardValue([11, 1]),
+                StandardRank.Ten => SelectCardValue([-10, 10]),
                 StandardRank.Jack or StandardRank.Queen => 10,
                 StandardRank.Four or StandardRank.King => 0,
                 StandardRank.Nine => 99,
@@ -102,17 +101,8 @@ do
             activePlayerIndex = 0;
         }
 
-        /*********************************
-        **                              **
-        **  HANDLE UNSTABLE CODE STATE  **
-        **                              **
-        *********************************/
+        // TODO: proper endRound due to no valid cards to play
         endRund = discardTotal >= 99;
-        /*********************************
-        **                              **
-        **  HANDLE UNSTABLE CODE STATE  **
-        **                              **
-        *********************************/
     } while (!endRund);
 
     /*********************************
@@ -130,3 +120,13 @@ do
 
 Console.WriteLine(Environment.NewLine + $"Press any key to exit, {playerName}.");
 Console.ReadKey();
+
+static int SelectCardValue(int[] options)
+{
+    int selectedValue = -99;
+    do
+    {
+        Console.Write($"{options[0]} or {options[1]}? ");
+    } while (!int.TryParse(Console.ReadLine(), out selectedValue) || !options.Contains(selectedValue));
+    return selectedValue;
+}
