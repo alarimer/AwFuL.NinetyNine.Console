@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-using System.Runtime.InteropServices;
-using AwFuL.PlayingCard;
+﻿using AwFuL.PlayingCard;
 
 Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + "Ninety Nine - A Card Game" + Environment.NewLine);
 Thread.Sleep(3000);
