@@ -52,6 +52,7 @@ while (playerTokens.Count(t => t > 0) > 1)
 
     Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + $"Begin round!");
     Thread.Sleep(2000);
+
     var activePlayerIndexes = playerTokens.Select((value, index) => new {value, index}).Where(t => t.value > 0).Select(p => p.index).ToArray();
     int activePlayerIndex = activePlayerIndexes[0];
     int discardTotal = 0;
@@ -63,6 +64,23 @@ while (playerTokens.Count(t => t > 0) > 1)
         string currentPlayerName = players[activePlayerIndex];
 
         Console.WriteLine(Environment.NewLine + $"Current discard total is {discardTotal}");
+
+        // check for three of a kind "Michigan variation"
+        if (IsMichiganWin(playerHands[activePlayerIndex]))
+        {
+            Console.WriteLine($"{currentPlayerName} has three of a kind and wins the round!" + Environment.NewLine + "All other players lose a token.");
+            PrintPlayerHand(playerHands[activePlayerIndex]);
+            for (int pt = playerTokens.Length - 1; pt >= 0; pt--)
+            {
+                if (playerTokens[pt] > 0 && pt != activePlayerIndex)
+                {
+                    playerTokens[pt]--;
+                }
+            }
+            PrintPlayerTokens(players, playerTokens);
+
+            break;
+        }
 
         bool hasValidPlay = false;
         foreach (StandardCard card in playerHands[activePlayerIndex])
@@ -83,15 +101,10 @@ while (playerTokens.Count(t => t > 0) > 1)
 
         if (!hasValidPlay)
         {
-            Console.WriteLine($"{players[activePlayerIndex]} cannot play a card and loses a token.");
-            Console.WriteLine($"\t{playerHands[activePlayerIndex][0]} - {playerHands[activePlayerIndex][1]} - {playerHands[activePlayerIndex][2]}" + Environment.NewLine);
+            Console.WriteLine($"{currentPlayerName} cannot play a card and loses a token.");
+            PrintPlayerHand(playerHands[activePlayerIndex]);
             playerTokens[activePlayerIndex]--;
-            Thread.Sleep(3000);
-            for (int pc = 0; pc < players.Count; pc++)
-            {
-                Console.WriteLine($"{players[pc],-10}: " + (playerTokens[pc] > 0 ? $"{playerTokens[pc]} tokens" : "out"));
-            }
-            Thread.Sleep(3000);
+            PrintPlayerTokens(players, playerTokens);
 
             break;
         }
@@ -143,7 +156,7 @@ while (playerTokens.Count(t => t > 0) > 1)
             cardValue = playMe.card.Rank == StandardRank.Nine ? 99 : playMe.value;
         }
 
-        Console.WriteLine($"{players[activePlayerIndex]} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
+        Console.WriteLine($"{currentPlayerName} played {selectedCard} for " + (cardValue == 99 ? $"{cardValue - discardTotal} resulting in a discard total of 99" : $"{cardValue}"));
         discardTotal = cardValue == 99 ? 99 : discardTotal + cardValue;
 
         playerHands[activePlayerIndex].Remove(selectedCard);
@@ -212,4 +225,24 @@ static int AdvancePlay(int[] activePlayerIndexes, int activePlayerIndex, bool is
 	selectionIndex %= activePlayerIndexes.Length;
 
 	return activePlayerIndexes[selectionIndex];
+}
+
+static bool IsMichiganWin(List<StandardCard> hand)
+{
+    return hand[0].Rank == hand[1].Rank && hand[0].Rank == hand[2].Rank;
+}
+
+static void PrintPlayerHand(List<StandardCard> playerHand)
+{
+    Console.WriteLine($"\t{playerHand[0]} - {playerHand[1]} - {playerHand[2]}" + Environment.NewLine);
+}
+
+static void PrintPlayerTokens(Dictionary<int, string> players, int[] playerTokens)
+{
+    Thread.Sleep(3000);
+    for (int pc = 0; pc < players.Count; pc++)
+    {
+        Console.WriteLine($"{players[pc],-10}: " + (playerTokens[pc] > 0 ? $"{playerTokens[pc]} tokens" : "out"));
+    }
+    Thread.Sleep(3000);
 }
