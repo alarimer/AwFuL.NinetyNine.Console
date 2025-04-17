@@ -1,4 +1,10 @@
-﻿using AwFuL.PlayingCard;
+﻿/*
+*   Copyright (c) 2025 Alan Larimer
+*   MIT License
+*   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED ...
+*/
+
+using AwFuL.PlayingCard;
 
 Console.WriteLine(Environment.NewLine + "*******************************" + Environment.NewLine + "Ninety Nine - A Card Game" + Environment.NewLine);
 Thread.Sleep(3000);
